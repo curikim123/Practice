@@ -1,0 +1,80 @@
+---
+title: "COVID-19 Higher Education Institution Closures"
+author: Curi Kim
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    theme: readable
+    vertical_layout: fill
+---
+
+```{r setup, include = FALSE}
+library(flexdashboard)
+library(leaflet)
+library(DT)
+library(dplyr)
+library(shiny)
+library(tidyverse)
+library(leaflet)
+library(plotly)
+library(ggplot2)
+library(crosstalk)
+
+FLEXDASHBOARD <- read.csv("~/Desktop/FLEXDASHBOARD.csv")
+hw <- FLEXDASHBOARD
+sd <- SharedData$new(hw)
+
+pal <- colorFactor(
+  palette = c("#7496D2", "#A35E60", "#FDDDA4", "#76A08A"),
+  domain = hw$Duration
+)
+
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Map
+
+```{r}
+
+sd %>%
+leaflet() %>% addTiles() %>% 
+addProviderTiles(providers$OpenStreetMap) %>% 
+fitBounds(-127.44,24.05,-65.30,50.35) %>% 
+addCircleMarkers(~Longitude, ~Latitude, popup=paste(hw$School.Name, "<br>", hw$Date.Range,  "<br>", hw$Comments), weight = 1, radius=5, color=~pal(hw$Duration), stroke = TRUE, fillOpacity = 0.8) %>%
+addLegend('bottomright', pal = pal, values = hw$Duration, title = 'Duration of Closure', opacity = 1)
+
+
+
+
+
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Select State {data-height=200}
+```{r filters}
+
+filter_select(
+  id = "State",
+  label = "",
+  sharedData = sd,
+  group = ~State
+)
+```
+
+
+### Duration of Closure
+
+```{r}
+
+g <- ggplot(hw, aes(x=Duration, fill=Duration))
+h <-  g + geom_bar(stat="count") + scale_fill_manual(values=c("#7496D2", "#A35E60", "#FDDDA4", "#76A08A"))
+i <- h + theme(axis.text.x = element_blank(), axis.title.x=element_blank(), axis.title.y=element_blank(), legend.position = "none",  plot.margin = margin(0,0,0,0, "cm")) 
+k <- ggplotly(i, tooltip = c("x","y","color")) 
+k
+```

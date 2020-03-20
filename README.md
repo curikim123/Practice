@@ -1,1 +1,1 @@
-https://curikim123.github.io/Practice/COVID-School-Closures.html
+https://curikim123.github.io/covid/COVID-School-Closures.html
